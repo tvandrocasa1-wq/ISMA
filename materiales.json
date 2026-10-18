@@ -1,0 +1,158 @@
+{
+  "materiales": [
+    {
+      "id": "granito",
+      "nombre": "Granito fino triturado",
+      "densidadKgM3": 1500,
+      "taludDinamicoGrados": 15,
+      "claseMaterial": "C",
+      "tamanoMaxMm": 10,
+      "granulometria": "uniforme",
+      "descripcion": "Pesado, abrasivo, tamaño uniforme 10 mm (Ejemplo del enunciado / apuntes)"
+    },
+    {
+      "id": "caliza",
+      "nombre": "Roca caliza",
+      "densidadKgM3": 1400,
+      "taludDinamicoGrados": 15,
+      "claseMaterial": "B",
+      "tamanoMaxMm": 250,
+      "granulometria": "mixto",
+      "descripcion": "No abrasivo, friable, 10% gruesos (Ejemplo 1 de los apuntes)"
+    },
+    {
+      "id": "arena_seca",
+      "nombre": "Arena seca",
+      "densidadKgM3": 1600,
+      "taludDinamicoGrados": 20,
+      "claseMaterial": "C",
+      "tamanoMaxMm": 5,
+      "granulometria": "uniforme",
+      "descripcion": "Abrasiva media, peso medio"
+    },
+    {
+      "id": "arena_humeda",
+      "nombre": "Arena húmeda",
+      "densidadKgM3": 1900,
+      "taludDinamicoGrados": 25,
+      "claseMaterial": "C",
+      "tamanoMaxMm": 5,
+      "granulometria": "uniforme",
+      "descripcion": "Pesada, abrasiva media, cohesiva"
+    },
+    {
+      "id": "antracita",
+      "nombre": "Carbón / Antracita",
+      "densidadKgM3": 960,
+      "taludDinamicoGrados": 15,
+      "claseMaterial": "B",
+      "tamanoMaxMm": 50,
+      "granulometria": "mixto",
+      "descripcion": "Densidad ligera-media, poco abrasivo"
+    },
+    {
+      "id": "cemento",
+      "nombre": "Cemento en polvo",
+      "densidadKgM3": 1200,
+      "taludDinamicoGrados": 10,
+      "claseMaterial": "B",
+      "tamanoMaxMm": 1,
+      "granulometria": "uniforme",
+      "descripcion": "Material pulverulento, fluido"
+    },
+    {
+      "id": "clinker",
+      "nombre": "Clinker de cemento",
+      "densidadKgM3": 1500,
+      "taludDinamicoGrados": 20,
+      "claseMaterial": "C",
+      "tamanoMaxMm": 60,
+      "granulometria": "mixto",
+      "descripcion": "Muy abrasivo y caliente"
+    },
+    {
+      "id": "mineral_hierro",
+      "nombre": "Mineral de hierro / Pirita",
+      "densidadKgM3": 2200,
+      "taludDinamicoGrados": 20,
+      "claseMaterial": "D",
+      "tamanoMaxMm": 80,
+      "granulometria": "mixto",
+      "descripcion": "Muy pesado, cortante y muy abrasivo"
+    },
+    {
+      "id": "cereal",
+      "nombre": "Cereal / Trigo",
+      "densidadKgM3": 750,
+      "taludDinamicoGrados": 10,
+      "claseMaterial": "A",
+      "tamanoMaxMm": 8,
+      "granulometria": "uniforme",
+      "descripcion": "Ligero, no abrasivo, deslizable"
+    },
+    {
+      "id": "personalizado",
+      "nombre": "Personalizado (manual)",
+      "densidadKgM3": 1500,
+      "taludDinamicoGrados": 15,
+      "claseMaterial": "C",
+      "tamanoMaxMm": 20,
+      "granulometria": "uniforme",
+      "descripcion": "Introduce los parámetros manualmente"
+    }
+  ],
+  "anchurasNormalizadasMm": [400, 500, 650, 800, 1000, 1200, 1400, 1600, 1800, 2000],
+  "velocidadesDIN22101": [0.66, 0.84, 1.05, 1.31, 1.68, 2.09, 2.62, 3.35, 4.19, 5.24],
+  "longitudRodilloCentralL3Mm": {
+    "400": 160,
+    "500": 200,
+    "650": 250,
+    "800": 315,
+    "1000": 380,
+    "1200": 465,
+    "1400": 530,
+    "1600": 600,
+    "1800": 670,
+    "2000": 750
+  },
+  "velocidadesMaximas": {
+    "400": { "A": 2.62, "B": 2.09, "C": 2.09, "D": 1.31 },
+    "500": { "A": 3.35, "B": 2.62, "C": 2.09, "D": 1.68 },
+    "650": { "A": 3.35, "B": 3.35, "C": 2.62, "D": 2.09 },
+    "800": { "A": 4.19, "B": 3.35, "C": 3.35, "D": 2.62 },
+    "1000": { "A": 4.19, "B": 4.19, "C": 3.35, "D": 2.62 },
+    "1200": { "A": 5.24, "B": 4.19, "C": 4.19, "D": 3.35 },
+    "1400": { "A": 5.24, "B": 5.24, "C": 4.19, "D": 3.35 },
+    "1600": { "A": 5.24, "B": 5.24, "C": 4.19, "D": 3.35 },
+    "1800": { "A": 5.24, "B": 5.24, "C": 4.19, "D": 3.35 },
+    "2000": { "A": 5.24, "B": 5.24, "C": 4.19, "D": 3.35 }
+  },
+  "factorInclinacionK": [
+    { "delta": 0, "k": 1.0 },
+    { "delta": 2, "k": 1.0 },
+    { "delta": 4, "k": 0.99 },
+    { "delta": 6, "k": 0.98 },
+    { "delta": 8, "k": 0.97 },
+    { "delta": 10, "k": 0.95 },
+    { "delta": 12, "k": 0.93 },
+    { "delta": 14, "k": 0.91 },
+    { "delta": 16, "k": 0.89 },
+    { "delta": 18, "k": 0.85 },
+    { "delta": 20, "k": 0.81 }
+  ],
+  "coeficienteClLongitud": [
+    { "L": 20, "Cl": 3.1 },
+    { "L": 40, "Cl": 2.4 },
+    { "L": 60, "Cl": 2.0 },
+    { "L": 80, "Cl": 1.8 },
+    { "L": 100, "Cl": 1.7 },
+    { "L": 150, "Cl": 1.5 },
+    { "L": 200, "Cl": 1.4 },
+    { "L": 300, "Cl": 1.3 },
+    { "L": 400, "Cl": 1.25 },
+    { "L": 500, "Cl": 1.2 },
+    { "L": 600, "Cl": 1.18 },
+    { "L": 800, "Cl": 1.15 },
+    { "L": 1000, "Cl": 1.12 }
+  ]
+}
