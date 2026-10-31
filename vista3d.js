@@ -1639,8 +1639,8 @@ const Vista3D = (() => {
 
   // El águila abre el recorrido: va delante de la cámara y la guía hasta la cinta.
   function moverAguila(rc, pos, mira) {
-    const FIN = 25;
-    if (rc.t > FIN + 6) {
+    const FIN = 9;
+    if (rc.t > FIN + 4) {
       aguila.visible = false;
       return;
     }
@@ -1649,9 +1649,9 @@ const Vista3D = (() => {
     const derecha = adelante.clone().cross(new THREE.Vector3(0, 1, 0)).normalize();
     const arriba = derecha.clone().cross(adelante).normalize();
     const salida = Math.max(0, rc.t - FIN);
-    const dist = 9.5 + salida * salida * 2.2;
+    const dist = 9.5 + salida * salida * 5;
     const lado = Math.sin(rc.t * 0.42) * 2.2 + 1.2;
-    const alto = Math.sin(rc.t * 0.6) * 0.5 - 0.9 + salida * salida * 0.5;
+    const alto = Math.sin(rc.t * 0.6) * 0.5 - 0.9 + salida * salida * 1.2;
     aguila.position.copy(pos).addScaledVector(adelante, dist).addScaledVector(derecha, lado).addScaledVector(arriba, alto);
     aguila.up.set(0, 1, 0);
     aguila.lookAt(aguila.position.clone().add(adelante));
@@ -1681,14 +1681,11 @@ const Vista3D = (() => {
     const todo = r.checks.every(c => c.ok);
     const tieneFlecha = r.relSup !== undefined;
     return [
-      { // Sobrevuelo de la cordillera, con el título.
-        camA: M3(-430, 300, 520), camB: M3(-250, 210, 300), objA: M3(320, 190, -620), objB: M3(180, 120, -520), fovA: 34, fovB: 38, dur: 9, luz: "alba",
-        titular: `CINTA TRANSPORTADORA<small>L = ${f(e.L, 0)} m · Q = ${f(r.Q, 0)} t/h · B = ${f(r.B, 0)} mm</small>`, titulo: "", lineas: [] },
-      { // Vuelo rasante sobre el valle hacia la instalación.
-        camA: M3(-190, 72, 210), camB: M3(-74, 24, 92), objA: M3(60, 12, -80), objB: W(L * 0.4, 0), fovA: 42, fovB: 36, dur: 8, luz: "alba", titulo: "", lineas: [] },
-      { // Entrada entre los árboles: la cinta aparece poco a poco.
-        camA: M3(-44, 2.3, 42), camB: M3(-24, 2.8, 25), objA: W(L * 0.25, 1), objB: W(L * 0.45, 0.5), fovA: 30, fovB: 34, dur: 8, titulo: "", lineas: [],
-        titular: `<small>Una instalación calculada de principio a fin</small>` },
+      { // Descenso único y continuo tras el águila: de la cordillera a la cinta.
+        curvaCam: new THREE.CatmullRomCurve3([M3(-430, 300, 520), M3(-250, 215, 300), M3(-112, 86, 138), M3(-46, 17, 50), M3(-20, 5, 25)], false, "centripetal"),
+        curvaObj: new THREE.CatmullRomCurve3([M3(320, 190, -620), M3(190, 125, -520), M3(70, 36, -110), W(L * 0.3, 1), W(L * 0.45, 0.6)], false, "centripetal"),
+        fovA: 34, fovB: 38, dur: 10, luz: "alba", titulo: "", lineas: [],
+        titular: `CINTA TRANSPORTADORA<small>L = ${f(e.L, 0)} m · Q = ${f(r.Q, 0)} t/h · B = ${f(r.B, 0)} mm</small>` },
       { // Travelling lateral con la cordillera detrás.
         camA: W(L * 0.1, 3.2, 24), camB: W(L * 0.85, 4.6, 22), objA: W(L * 0.35, 1), objB: W(L * 0.65, 1), fovA: 34, fovB: 34, dur: 8, conCotas: true, titulo: "La instalación",
         lineas: [`L = ${f(e.L, 1)} m · H = ${f(e.H, 1)} m · δ = ${f(r.deltaDeg, 2)}°`, `Banda B = ${f(r.B, 0)} mm · v = ${f(r.v, 2)} m/s`, `Caudal Q = ${f(r.Q, 1)} t/h`] },
@@ -1930,6 +1927,11 @@ const Vista3D = (() => {
     const u = Math.max(0, Math.min(1, x));
     const s = u * u * (3 - 2 * u);
     const suave = 0.35 * u + 0.65 * s; // No llega a detenerse del todo en los extremos.
+    if (tr.curvaCam) {
+      // Velocidad uniforme a lo largo de la curva, arrancando y frenando sin brusquedad.
+      const m = u * u * u * (u * (6 * u - 15) + 10);
+      return { pos: tr.curvaCam.getPointAt(m), mira: tr.curvaObj.getPointAt(m), fov: tr.fovA + (tr.fovB - tr.fovA) * m };
+    }
     const mira = tr.objA.clone().lerp(tr.objB, suave);
     let pos;
     if (tr.orbita) {
