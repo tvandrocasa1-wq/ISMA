@@ -3,7 +3,7 @@ DIMENSIONADO DE UNA CINTA TRANSPORTADORA: HTML + CSS + JSON + JavaScript + Canva
 
 Tarea 1: desarrollo de aplicación web
 Transporte y Manutención Industrial. Máster Universitario en Ingeniería Industrial. USAL
-Autor: Ismail El Asri Dahnoun
+Autor: Ismail
 
 
 Objetivo
