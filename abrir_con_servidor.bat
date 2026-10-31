@@ -1,8 +1,8 @@
 @echo off
-title Servidor Web - Dimensionamiento de Cintas Transportadoras
+title Servidor Web - Cinta transportadora
 cd /d "%~dp0"
 echo ================================================================
-echo   Iniciando servidor local para Cintas Transportadoras...
+echo   Iniciando servidor local para la cinta transportadora...
 echo   Abriendo el navegador en http://localhost:8000
 echo   (Para cerrar el servidor, simplemente cierra esta ventana)
 echo ================================================================

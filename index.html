@@ -3,335 +3,275 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dimensionamiento de Cintas Transportadoras | DIN 22101</title>
-  <link rel="stylesheet" href="styles.css">
-  <script src="script.js" defer></script>
+  <title>Dimensionado de una cinta transportadora</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="styles.css?v=41">
+  <script src="three.min.js" defer></script>
+  <script src="vista3d.js?v=42" defer></script>
+  <script src="script.js?v=21" defer></script>
 </head>
 <body>
+  <main class="contenedor">
+    <header>
+      <p class="etiqueta">TAREA 1 · TRANSPORTE Y MANUTENCIÓN INDUSTRIAL · USAL</p>
+      <h1>Dimensionado de una cinta transportadora</h1>
+      <p>Introduce los datos de la instalación para calcular la capacidad, las resistencias al avance, la potencia, las tensiones, la flecha y el número de capas de la banda.</p>
+    </header>
 
-  <!-- Encabezado Principal -->
-  <header class="app-header">
-    <div class="header-container">
-      <span class="badge-tag">Transporte y Manutención Industrial · Máster en Ingeniería Industrial</span>
-      <h1>Dimensionamiento de Cintas Transportadoras</h1>
-      <p class="subtitle">Aplicación web interactiva para el cálculo riguroso de capacidad de transporte, sección en artesa, velocidad normalizada DIN 22101, potencia de accionamiento y tensiones de banda según Euler-Eytelwein.</p>
-    </div>
-  </header>
+    <section class="tarjeta" aria-labelledby="controles-titulo">
+      <h2 id="controles-titulo">1. Introduce los datos</h2>
 
-  <!-- Barra de Casos Predefinidos y Acciones -->
-  <nav class="preset-bar">
-    <div class="preset-container">
-      <span class="preset-label">Cargar Ejemplos:</span>
-      <button type="button" class="btn-preset active" data-preset="granito">Granito fino (Enunciado / 100 T/h)</button>
-      <button type="button" class="btn-preset" data-preset="caliza">Caliza (Ejemplo 1 / 1500 T/h)</button>
-      <button type="button" class="btn-preset" data-preset="uned">Problema UNED (B=650 mm / Artesa)</button>
-      <button type="button" class="btn-secondary" style="margin-left: auto;" onclick="window.print()">🖨️ Imprimir / Exportar Memoria</button>
-    </div>
-  </nav>
-
-  <!-- Cuerpo Principal de 2 Columnas -->
-  <main class="main-container">
-
-    <!-- COLUMNA 1: FORMULARIOS Y PARÁMETROS -->
-    <aside class="controls-column">
-
-      <!-- Tarjeta 1: Material -->
-      <section class="card">
-        <h2 class="card-title"><span class="step-num">1</span> Material a Transportar</h2>
-        
-        <div class="form-group">
-          <label for="sel-material">Base de Datos de Materiales (JSON)</label>
-          <select id="sel-material"></select>
-          <p class="help-text">Propiedades físicas extraídas de tablas de fabricantes y del manual Rulmeca.</p>
-        </div>
-
-        <div class="grid-2">
-          <div class="form-group">
-            <label for="in-rho">Densidad aparente ρ (kg/m³)</label>
-            <input type="number" id="in-rho" value="1500" step="50" min="100">
-          </div>
-          <div class="form-group">
-            <label for="in-beta">Talud dinámico β (grados)</label>
-            <input type="number" id="in-beta" value="15" step="1" min="0" max="45">
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="sel-clase">Clase de Abrasividad / Tipo (Figura 2)</label>
-          <select id="sel-clase">
-            <option value="A">Clase A: Ligero (0,5–1 T/m³, no abrasivo)</option>
-            <option value="B">Clase B: Medio (1–1,5 T/m³, no abrasivo)</option>
-            <option value="C" selected>Clase C: Pesado / Medianamente abrasivo (1,5–2 T/m³)</option>
-            <option value="D">Clase D: Muy pesado / Muy abrasivo y cortante (>2 T/m³)</option>
-          </select>
-          <p class="help-text">Determina la velocidad máxima admisible para evitar desgaste y derrames.</p>
-        </div>
-      </section>
-
-      <!-- Tarjeta 2: Geometría de la Cinta -->
-      <section class="card">
-        <h2 class="card-title"><span class="step-num">2</span> Geometría y Capacidad Requerida</h2>
-
-        <div class="form-group">
-          <label for="in-Q">Caudal másico requerido Q (T/h)</label>
-          <input type="number" id="in-Q" value="100" step="10" min="1">
-        </div>
-
-        <div class="grid-2">
-          <div class="form-group">
-            <label for="in-L">Longitud de la cinta L (m)</label>
-            <input type="number" id="in-L" value="100" step="10" min="1">
-          </div>
-          <div class="form-group">
-            <label for="in-H">Desnivel de elevación H (m)</label>
-            <input type="number" id="in-H" value="0" step="1" min="0">
-            <p class="help-text">0 si es completamente horizontal.</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- Tarjeta 3: Artesa y Rodillos -->
-      <section class="card">
-        <h2 class="card-title"><span class="step-num">3</span> Configuración de la Artesa</h2>
-
-        <div class="grid-2">
-          <div class="form-group">
-            <label for="sel-rodillos">Estación de rodillos</label>
-            <select id="sel-rodillos">
-              <option value="1">1 rodillo plano (λ = 0º)</option>
-              <option value="2">2 rodillos en V</option>
-              <option value="3" selected>3 rodillos en artesa</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="in-lambda">Ángulo de artesa λ (grados)</label>
-            <input type="number" id="in-lambda" value="30" step="5" min="0" max="60">
-          </div>
-        </div>
-
-        <div class="grid-2">
-          <div class="form-group">
-            <label for="sel-ancho">Ancho de banda B (mm)</label>
-            <select id="sel-ancho"></select>
-          </div>
-          <div class="form-group">
-            <label for="sel-vel-manual">Velocidad de avance v</label>
-            <select id="sel-vel-manual"></select>
-          </div>
-        </div>
-      </section>
-
-      <!-- Tarjeta 4: Motor y Accionamiento -->
-      <section class="card">
-        <h2 class="card-title"><span class="step-num">4</span> Potencia y Resistencias al Avance</h2>
-
-        <div class="grid-2">
-          <div class="form-group">
-            <label for="in-rendimiento">Rendimiento reductor η (%)</label>
-            <input type="number" id="in-rendimiento" value="85" step="1" min="50" max="100">
-          </div>
-          <div class="form-group">
-            <label for="in-f">Coeficiente fricción f</label>
-            <input type="number" id="in-f" value="0.02" step="0.005" min="0.01">
-          </div>
-        </div>
-
-        <div class="grid-3">
-          <div class="form-group">
-            <label for="in-qb">Peso banda qb (kg/m)</label>
-            <input type="number" id="in-qb" value="3.8" step="0.1">
-          </div>
-          <div class="form-group">
-            <label for="in-peso-sup">Masa rodillo sup. (kg)</label>
-            <input type="number" id="in-peso-sup" value="5.4" step="0.1">
-          </div>
-          <div class="form-group">
-            <label for="in-dist-sup">Paso sup. (m)</label>
-            <input type="number" id="in-dist-sup" value="1.2" step="0.1">
-          </div>
-        </div>
-
-        <div class="grid-2">
-          <div class="form-group">
-            <label for="in-peso-inf">Masa rodillo inf. (kg)</label>
-            <input type="number" id="in-peso-inf" value="4.0" step="0.1">
-          </div>
-          <div class="form-group">
-            <label for="in-dist-inf">Paso inf. (m)</label>
-            <input type="number" id="in-dist-inf" value="2.4" step="0.1">
-          </div>
-        </div>
-      </section>
-
-      <!-- Tarjeta 5: Tensión y Banda -->
-      <section class="card">
-        <h2 class="card-title"><span class="step-num">5</span> Comprobación de Banda (Euler-Eytelwein)</h2>
-
-        <div class="grid-2">
-          <div class="form-group">
-            <label for="in-mu">Fricción tambor μ</label>
-            <input type="number" id="in-mu" value="0.02" step="0.01" min="0.01">
-            <p class="help-text">Dato del ejemplo (0.02 o 0.35 según revestimiento).</p>
-          </div>
-          <div class="form-group">
-            <label for="in-theta">Ángulo arrollamiento θ (º)</label>
-            <input type="number" id="in-theta" value="210" step="5">
-          </div>
-        </div>
-
-        <div class="grid-3">
-          <div class="form-group">
-            <label for="in-capas">Nº de capas</label>
-            <input type="number" id="in-capas" value="3" min="1">
-          </div>
-          <div class="form-group">
-            <label for="in-r-nominal">Resistencia (N/mm·capa)</label>
-            <input type="number" id="in-r-nominal" value="200" step="25">
-          </div>
-          <div class="form-group">
-            <label for="in-cs">Seguridad Cs</label>
-            <input type="number" id="in-cs" value="10" step="1">
-          </div>
-        </div>
-      </section>
-
-      <!-- Cargar archivo JSON personalizado -->
-      <div class="json-upload-box">
+      <div class="controles">
         <div>
-          <strong>¿Modificaste materiales.json?</strong>
-          <p class="help-text">Puedes cargarlo manualmente si abriste la web directamente con doble clic.</p>
+          <label for="ejemplo">Cargar un ejemplo resuelto</label>
+          <select id="ejemplo" disabled><option>Cargando datos…</option></select>
+          <p class="ayuda" id="ejemplo-nota"></p>
         </div>
-        <label for="input-archivo-json" class="btn-secondary" style="cursor: pointer;">📂 Cargar JSON</label>
-        <input type="file" id="input-archivo-json" accept=".json" style="display: none;">
+        <div>
+          <label for="modo">¿Qué quieres hacer?</label>
+          <select id="modo">
+            <option value="dimensionar">Dimensionar: la app elige B y v</option>
+            <option value="comprobar">Comprobar: yo indico B y v</option>
+          </select>
+          <p class="ayuda" id="modo-ayuda"></p>
+        </div>
       </div>
 
-    </aside>
+      <p class="leyenda-led"><span class="muestra azul"></span> Dato del enunciado <span class="muestra roja"></span> Conviene cambiarlo para que el diseño cumpla</p>
 
-    <!-- COLUMNA 2: RESULTADOS Y VISUALIZACIÓN GRÁFICA -->
-    <section class="results-column">
-
-      <!-- Tarjeta de Estado y Validación -->
-      <div class="card">
-        <div class="results-header">
-          <h2 style="font-size: 1.4rem; font-weight: 800; color: var(--primary);">Resumen de Dimensionamiento</h2>
-          <div id="status-badge" class="status-badge valid">Calculando...</div>
+      <fieldset>
+        <legend>Carga y material</legend>
+        <div class="campos">
+          <div class="solo-comprobar"><label for="datoCarga">Dato de carga</label>
+            <select id="datoCarga">
+              <option value="Q">Capacidad Q</option>
+              <option value="qg">Masa lineal q<sub>g</sub> (sin material)</option>
+            </select></div>
+          <div class="con-Q"><label for="Q">Capacidad requerida Q (t/h)</label><input type="number" id="Q" min="0" step="any"></div>
+          <div class="con-qg"><label for="qgDato">Masa lineal de material q<sub>g</sub> (kg/m)</label><input type="number" id="qgDato" min="0" step="any"></div>
+          <div class="con-Q"><label for="material">Material</label><select id="material" disabled></select></div>
+          <div class="con-Q"><label for="rho">Densidad aparente ρ (kg/m³)</label><input type="number" id="rho" min="0" step="any"></div>
+          <div><label for="talud">Ángulo de sobrecarga θ (°)</label><input type="number" id="talud" min="0" max="45" step="any"></div>
+          <div class="con-Q"><label for="categoria">Categoría (Tabla 1.3)</label>
+            <select id="categoria">
+              <option value="A">A: ligero, no abrasivo</option>
+              <option value="B">B: poco abrasivo, medio</option>
+              <option value="C">C: abrasivo y pesado</option>
+              <option value="D">D: muy abrasivo y cortante</option>
+            </select></div>
+          <div class="con-Q"><label for="granulometria">Granulometría</label>
+            <select id="granulometria">
+              <option value="mixto">Mixto (10 % gruesos, 90 % finos)</option>
+              <option value="uniforme">Uniforme (100 % gruesos)</option>
+            </select></div>
+          <div class="con-Q"><label for="tamano">Tamaño máximo de bulto (mm)</label><input type="number" id="tamano" min="0" step="any"></div>
         </div>
+      </fieldset>
 
-        <!-- Indicadores KPIs -->
-        <div class="kpi-grid">
-          <div class="kpi-card">
-            <div class="kpi-label">Ancho de Banda</div>
-            <div class="kpi-val"><span id="kpi-ancho">—</span><span class="kpi-unit">mm</span></div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">Velocidad DIN 22101</div>
-            <div class="kpi-val"><span id="kpi-vel">—</span><span class="kpi-unit">m/s</span></div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">Caudal Efectivo</div>
-            <div class="kpi-val"><span id="kpi-caudal">—</span><span class="kpi-unit">T/h</span></div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">Sección de Material</div>
-            <div class="kpi-val"><span id="kpi-seccion">—</span><span class="kpi-unit">cm²</span></div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">Potencia Motor</div>
-            <div class="kpi-val"><span id="kpi-potencia">—</span><span class="kpi-unit">kW</span></div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">Tensión Máxima T₁</div>
-            <div class="kpi-val"><span id="kpi-t1">—</span><span class="kpi-unit">kN</span></div>
-          </div>
+      <fieldset>
+        <legend>Geometría y banda</legend>
+        <div class="campos">
+          <div><label for="L">Longitud entre tambores L (m)</label><input type="number" id="L" min="0" step="any"></div>
+          <div><label for="H">Desnivel H (m), + sube, − baja</label><input type="number" id="H" step="any"></div>
+          <div><label for="estacion">Estación de rodillos</label>
+            <select id="estacion">
+              <option value="1">1 rodillo (plana)</option>
+              <option value="2">2 rodillos (en V)</option>
+              <option value="3">3 rodillos (en artesa)</option>
+            </select></div>
+          <div><label for="lambda">Ángulo de artesa λ (°)</label><input type="number" id="lambda" min="0" max="60" step="any"><p class="ayuda" id="lambda-ayuda"></p></div>
+          <div class="con-Q"><label for="metodoCap">Método de capacidad</label>
+            <select id="metodoCap">
+              <option value="masico">Flujo másico (fórmulas S₁ + S₂)</option>
+              <option value="volumetrico">Flujo volumétrico (tablas Rulmeca)</option>
+            </select></div>
+          <div class="solo-dimensionar"><label for="selB">Fijar anchura B (opcional)</label><select id="selB"></select></div>
+          <div class="solo-dimensionar"><label for="selV">Fijar velocidad v (opcional)</label><select id="selV"></select></div>
+          <div class="solo-comprobar"><label for="B">Anchura de banda B (mm)</label><input type="number" id="B" min="0" step="any"></div>
+          <div class="solo-comprobar"><label for="v">Velocidad v (m/s)</label><input type="number" id="v" min="0" step="any"></div>
+          <div><label for="qb">Masa de banda q<sub>b</sub> (kg/m, cada ramal)</label><input type="number" id="qb" min="0" step="any"></div>
+          <div><label for="qRO">Rodillos portantes q<sub>RO</sub> (kg/m)</label><input type="number" id="qRO" min="0" step="any"></div>
+          <div><label for="qRU">Rodillos de retorno q<sub>RU</sub> (kg/m)</label><input type="number" id="qRU" min="0" step="any"></div>
+          <div><label for="lsup">Separación rodillos portantes (m)</label><input type="number" id="lsup" min="0" step="any"></div>
+          <div><label for="linf">Separación rodillos retorno (m)</label><input type="number" id="linf" min="0" step="any"></div>
+          <div><label for="hmax">Flecha relativa máxima (%)</label><input type="number" id="hmax" min="0" step="any"></div>
         </div>
+      </fieldset>
 
-        <!-- Canvas Gráfico Interactivo -->
-        <div class="canvas-container">
-          <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; color: var(--text-main);">
-            Sección Transversal del Material en la Artesa (S₁ + S₂)
-          </h3>
-          <canvas id="canvas-artesa" width="700" height="340"></canvas>
-          <p class="help-text" style="margin-top: 6px;">
-            <span style="color: #ca8a04; font-weight: bold;">Amarillo (S₁):</span> Montículo superior debido al talud dinámico β · 
-            <span style="color: #15803d; font-weight: bold;">Verde (S₂):</span> Trapecio inferior formado por la inclinación de artesa λ · 
-            <span style="color: #0f172a; font-weight: bold;">Línea gruesa:</span> Banda transportadora apoyada en los rodillos.
-          </p>
+      <fieldset>
+        <legend>Resistencias al avance</legend>
+        <div class="campos">
+          <div><label for="f">Coeficiente global f</label><input type="number" id="f" min="0" step="any"></div>
+          <div class="con-largo"><label for="usoC">Coeficiente C (si L &gt; 80 m)</label>
+            <select id="usoC">
+              <option value="auto">Automático (tabla)</option>
+              <option value="manual">Lo indico yo</option>
+            </select></div>
+          <div class="con-largo con-Cmanual"><label for="C">Valor de C</label><input type="number" id="C" min="1" step="any"></div>
+          <div class="con-corto"><label for="vent">Velocidad de entrada del material (m/s)</label><input type="number" id="vent" min="0" step="any"></div>
+          <div class="con-corto"><label for="FNtamb">Tambores no motrices F<sub>N,tamb</sub> (N)</label><input type="number" id="FNtamb" min="0" step="any"></div>
+          <div><label for="FS1">Especiales principales F<sub>S1</sub> (N)</label><input type="number" id="FS1" min="0" step="any"></div>
+          <div><label for="FS2">Especiales secundarias F<sub>S2</sub> (N)</label><input type="number" id="FS2" min="0" step="any"></div>
         </div>
+      </fieldset>
 
+      <fieldset>
+        <legend>Accionamiento y tensiones</legend>
+        <div class="campos">
+          <div><label for="eta">Rendimiento η (0 a 1)</label><input type="number" id="eta" min="0" max="1" step="any"></div>
+          <div><label for="r">Radio del tambor motriz r (m)</label><input type="number" id="r" min="0" step="any"></div>
+          <div><label for="mu">Rozamiento banda-tambor μ</label><input type="number" id="mu" min="0" step="any"></div>
+          <div><label for="thetaDeg">Ángulo abrazado φ (°)</label><input type="number" id="thetaDeg" min="0" max="360" step="any"></div>
+          <div><label for="modoT2">Tensión T₂ del ramal flojo</label>
+            <select id="modoT2">
+              <option value="auto">Automática (mínima con margen)</option>
+              <option value="manual">La adopto yo</option>
+            </select></div>
+          <div class="con-T2auto"><label for="margen">Margen de adherencia (%)</label><input type="number" id="margen" min="0" step="any"></div>
+          <div class="con-T2manual"><label for="T2">T₂ adoptada (N)</label><input type="number" id="T2" min="0" step="any"></div>
+          <div><label for="modoLocal">Tensiones locales para la flecha</label>
+            <select id="modoLocal">
+              <option value="recorrido">Calculadas (mínima de cada ramal)</option>
+              <option value="manual">Las adopto yo</option>
+            </select></div>
+          <div class="con-localmanual"><label for="Tsup">T local portante (N)</label><input type="number" id="Tsup" min="0" step="any"></div>
+          <div class="con-localmanual"><label for="Tinf">T local retorno (N)</label><input type="number" id="Tinf" min="0" step="any"></div>
+          <div><label for="R">Resistencia por capa R (N/mm)</label><input type="number" id="R" min="0" step="any"></div>
+          <div><label for="zmin">Mínimo constructivo de capas</label><input type="number" id="zmin" min="1" step="1"></div>
+          <div><label for="FuDato">F<sub>u</sub> conocida (N), opcional</label><input type="number" id="FuDato" min="0" step="any" placeholder="Vacío: se calcula"></div>
+          <div><label for="TmaxDato">T<sub>máx</sub> conocida (N), opcional</label><input type="number" id="TmaxDato" min="0" step="any" placeholder="Vacío: T₁"></div>
+        </div>
+        <div class="con-T2manual deslizador">
+          <label for="T2rango">Mueve T₂ y observa cómo cambian la adherencia y la flecha: <strong id="T2-valor">—</strong></label>
+          <input type="range" id="T2rango" min="0" max="10000" step="50">
+          <div class="extremos"><span>0 N</span><span id="T2-max">—</span></div>
+        </div>
+      </fieldset>
+
+      <div class="cargar-json-contenedor">
+        <label for="archivo-json" class="boton-secundario">📂 Cargar archivo datos.json</label>
+        <input type="file" id="archivo-json" accept=".json">
+        <span id="archivo-nombre" class="ayuda"></span>
+        <button type="button" class="boton-secundario" id="imprimir">🖨️ Imprimir o guardar en PDF</button>
       </div>
 
-      <!-- Memoria de Cálculo Paso a Paso -->
-      <section class="card">
-        <h2 class="card-title">Justificación y Memoria de Cálculo Detallada</h2>
-        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 16px;">
-          Desglose analítico de acuerdo a los apuntes de la asignatura y las normas DIN 22101 y UNE 58-504-98:
-        </p>
-
-        <!-- Paso 1 -->
-        <div class="step-accordion open">
-          <div class="step-header">
-            <span>Paso 1: Ángulo de Inclinación δ y Factor Corrector k</span>
-            <span>▼</span>
-          </div>
-          <div class="step-content" id="calc-paso1"></div>
-        </div>
-
-        <!-- Paso 2 -->
-        <div class="step-accordion open">
-          <div class="step-header">
-            <span>Paso 2: Selección del Ancho B y Velocidad Límite v_máx</span>
-            <span>▼</span>
-          </div>
-          <div class="step-content" id="calc-paso2"></div>
-        </div>
-
-        <!-- Paso 3 -->
-        <div class="step-accordion open">
-          <div class="step-header">
-            <span>Paso 3: Sección Transversal Analítica (Método 1: b, l₃, w, S₁, S₂, I_VT)</span>
-            <span>▼</span>
-          </div>
-          <div class="step-content" id="calc-paso3"></div>
-        </div>
-
-        <!-- Paso 4 -->
-        <div class="step-accordion open">
-          <div class="step-header">
-            <span>Paso 4: Velocidad Teórica y Normalización (DIN 22101)</span>
-            <span>▼</span>
-          </div>
-          <div class="step-content" id="calc-paso4"></div>
-        </div>
-
-        <!-- Paso 5 -->
-        <div class="step-accordion open">
-          <div class="step-header">
-            <span>Paso 5: Resistencias al Avance y Potencia del Motor Eléctrico</span>
-            <span>▼</span>
-          </div>
-          <div class="step-content" id="calc-paso5"></div>
-        </div>
-
-        <!-- Paso 6 -->
-        <div class="step-accordion open">
-          <div class="step-header">
-            <span>Paso 6: Tensiones en Tambor y Verificación de Banda (Euler-Eytelwein)</span>
-            <span>▼</span>
-          </div>
-          <div class="step-content" id="calc-paso6"></div>
-        </div>
-
-      </section>
-
+      <div id="estado" role="status" aria-live="polite"></div>
     </section>
 
+    <section class="tarjeta" aria-labelledby="resultado-titulo">
+      <h2 id="resultado-titulo">2. Observa el resultado</h2>
+      <div id="veredicto" class="veredicto"></div>
+      <div class="resultado">
+        <div><span class="resultado-etiqueta">Banda</span><p id="r-banda" class="cifra">—</p></div>
+        <div><span class="resultado-etiqueta">Fuerza periférica F<sub>u</sub></span><p id="r-fu" class="cifra">—</p></div>
+        <div><span class="resultado-etiqueta">Potencia en el eje del motor</span><p id="r-pot" class="cifra">—</p></div>
+        <div><span class="resultado-etiqueta">Tensiones T₁ / T₂</span><p id="r-ten" class="cifra">—</p></div>
+        <div><span class="resultado-etiqueta">Capas de la banda</span><p id="r-capas" class="cifra">—</p></div>
+        <div><span class="resultado-etiqueta">Capacidad de la cinta</span><p id="r-cap" class="cifra">—</p></div>
+        <div><span class="resultado-etiqueta">Sección de material S</span><p id="r-sec" class="cifra">—</p></div>
+      </div>
+
+      <h3>Comprobaciones</h3>
+      <ul id="comprobaciones" class="comprobaciones"></ul>
+      <div id="consejos" class="consejos oculto"></div>
+      <div id="avisos" class="avisos"></div>
+
+      <h3>Cinta en 3D, en movimiento</h3>
+      <div id="cinta3d-marco">
+      <div class="controles-3d">
+        <button type="button" class="pestana cine" id="cinta3d-recorrido">🎬 Recorrido</button>
+        <button type="button" class="pestana activa" data-camara="general">Vista general</button>
+        <button type="button" class="pestana" data-camara="tambor">Tambor motriz</button>
+        <button type="button" class="pestana" data-camara="estacion">Rodillos</button>
+        <button type="button" class="pestana" data-camara="seccion">Sección en corte</button>
+        <button type="button" class="pestana" data-camara="flecha">Flecha</button>
+        <button type="button" class="pestana" id="cinta3d-pausa"></button>
+        <button type="button" class="pestana" id="cinta3d-acercar" aria-label="Acercar">＋</button>
+        <button type="button" class="pestana" id="cinta3d-alejar" aria-label="Alejar">－</button>
+        <button type="button" class="pestana" id="cinta3d-mapa">Mapa de tensiones</button>
+        <button type="button" class="pestana activa" id="cinta3d-fuerzas">Fuerzas</button>
+        <button type="button" class="pestana activa" id="cinta3d-material">Material</button>
+        <button type="button" class="pestana" id="cinta3d-cotas">📐 Cotas</button>
+        <button type="button" class="pestana" id="cinta3d-reenvio">⚙ Tambor de reenvío</button>
+        <button type="button" class="pestana oculto" id="cinta3d-solucion">🔧 Ver solución</button>
+        <button type="button" class="pestana" id="cinta3d-capas">🔍 Capas de la banda</button>
+        <label class="selector-3d" for="cinta3d-flecha">Flecha
+          <select id="cinta3d-flecha">
+            <option value="1">real</option>
+            <option value="5">× 5</option>
+            <option value="20">× 20</option>
+            <option value="50">× 50</option>
+          </select>
+        </label>
+        <button type="button" class="pestana" id="cinta3d-completa">⛶ Pantalla completa</button>
+      </div>
+      <div id="cinta3d"><div id="cinta3d-rotulos"></div><div id="cinta3d-aviso" class="oculto"></div><div id="cinta3d-leyenda" class="oculto"></div>
+        <div id="cinta3d-panel" class="oculto"></div>
+        <div id="lente-capas" class="oculto"><canvas id="lente-lienzo" width="440" height="440"></canvas></div>
+        <div id="cinta3d-cine" class="oculto">
+          <div class="franja"></div>
+          <div id="cine-fundido"></div>
+          <div id="cine-titular"></div>
+          <div class="tarjeta-cine" id="cine-tarjeta"></div>
+          <div class="franja abajo"></div>
+          <div class="reproductor">
+            <button type="button" id="cine-atras" title="Tramo anterior" aria-label="Tramo anterior">⏮</button>
+            <button type="button" id="cine-pausa" title="Pausar o reanudar" aria-label="Pausar o reanudar">⏸</button>
+            <button type="button" id="cine-adelante" title="Tramo siguiente" aria-label="Tramo siguiente">⏭</button>
+            <input type="range" id="cine-barra" min="0" max="1000" value="0" aria-label="Posición del recorrido">
+            <span id="cine-tiempo">0:00</span>
+            <select id="cine-velocidad" aria-label="Velocidad">
+              <option value="0.5">× 0,5</option>
+              <option value="1" selected>× 1</option>
+              <option value="1.5">× 1,5</option>
+              <option value="2">× 2</option>
+            </select>
+            <button type="button" id="cine-acercar" title="Acercar" aria-label="Acercar">＋</button>
+            <button type="button" id="cine-alejar" title="Alejar" aria-label="Alejar">－</button>
+            <button type="button" id="cine-parar" title="Salir" aria-label="Salir">■</button>
+          </div>
+        </div></div>
+      </div>
+      <p class="pie-grafica"><span id="cinta3d-pie"></span> Arrastra para girar la cámara.</p>
+
+      <div id="bloque-seccion">
+        <h3>Sección transversal del material (S₁ + S₂), a escala</h3>
+        <canvas id="seccion" width="760" height="330" role="img" aria-label="Sección transversal del material sobre la banda"></canvas>
+        <p class="pie-grafica">Amarillo: S₁, montículo superior por el ángulo de sobrecarga. Verde: S₂, trapecio inferior por la artesa. Negro: banda. Gris: rodillos.</p>
+      </div>
+
+      <h3>Esquema de la cinta</h3>
+      <canvas id="esquema" width="760" height="300" role="img" aria-label="Esquema de la cinta con las tensiones de cada ramal"></canvas>
+      <p class="pie-grafica">Rojo: ramal tenso. Azul: ramal flojo. Las flechas indican el sentido de avance de la banda.</p>
+
+      <h3>Flecha frente a tensión</h3>
+      <canvas id="grafica" width="760" height="350" role="img" aria-label="Gráfico de flecha relativa frente a la tensión local de cada ramal"></canvas>
+      <p class="pie-grafica">Cada curva muestra cuánto se hunde la banda de ese ramal según su tensión. Donde corta la flecha máxima está su tensión mínima. Si el punto rojo queda por debajo de la línea discontinua, cumple.</p>
+    </section>
+
+    <section class="tarjeta" aria-labelledby="desarrollo-titulo">
+      <h2 id="desarrollo-titulo">3. Sigue el cálculo paso a paso</h2>
+      <p class="ayuda">Cada fila muestra la fórmula, los valores sustituidos y el resultado, para poder repetirlo a mano.</p>
+      <div class="tabla-envoltura">
+        <table id="pasos">
+          <thead><tr><th>Magnitud</th><th>Fórmula y sustitución</th><th>Resultado</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="tarjeta" aria-labelledby="ejercicios-titulo">
+      <h2 id="ejercicios-titulo">4. Ejercicios resueltos de la asignatura</h2>
+      <p class="ayuda">Cada ejercicio se resuelve con el código de esta página y se compara con el valor publicado. Al abrir uno, sus datos de partida se cargan en la calculadora.</p>
+      <p id="ejercicios-resumen" class="resumen-ej"></p>
+      <div id="ejercicios"></div>
+    </section>
+
+    <footer>
+      <strong>¿Qué archivo hace cada cosa?</strong>
+      <p><code>index.html</code> crea los elementos · <code>styles.css</code> les da estilo · <code>datos.json</code> guarda los materiales, las tablas, los ejemplos y los ejercicios · <code>script.js</code> calcula y dibuja sobre <code>&lt;canvas&gt;</code> · <code>vista3d.js</code> anima la cinta con la biblioteca <code>three.min.js</code>.</p>
+      <p><strong>Importante:</strong> es un diseño preliminar en régimen estacionario, con un único tambor motriz situado en la descarga. No incluye arranque ni frenado.</p>
+    </footer>
   </main>
-
-  <!-- Pie de Página -->
-  <footer class="app-footer">
-    <p><strong>Estructura del Proyecto:</strong> <code>index.html</code> (Estructura semántica) · <code>styles.css</code> (Diseño responsive y maquetación) · <code>materiales.json</code> (Tablas y propiedades) · <code>script.js</code> (Motor analítico y Canvas) · <code>Readme.txt</code> (Documentación y resolución de ejemplos).</p>
-    <p style="margin-top: 6px;">Máster Universitario en Ingeniería Industrial · Escuela Politécnica Superior · Universidad de Salamanca</p>
-  </footer>
-
 </body>
 </html>
