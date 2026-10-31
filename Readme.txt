@@ -100,7 +100,8 @@ Cómo se usa
    consejo, porque unas magnitudes dependen de otras.
    El selector de ejemplos incluye cuatro "Casos que fallan" (patinaje, flecha, capacidad
    y velocidad). Los fallos también se ven en 3D: el tambor rojo que gira en falso, el
-   ramal rojo hundido y el material que rebosa.
+   ramal rojo hundido y el material que rebosa. Si patina, la banda avanza a tirones, el
+   tambor gira en falso con chispas y humo, y el recorrido añade una escena propia.
 6. Abre un ejercicio de la sección 4 para ver su enunciado, su desarrollo y la
    comparación con el valor publicado. Al abrirlo, sus datos de partida se cargan en la
    calculadora. Los ejercicios parciales usan "Fu conocida" y "Tmáx conocida".

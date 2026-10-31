@@ -289,7 +289,15 @@ const Vista3D = (() => {
     lecho: new THREE.MeshStandardMaterial({ color: 0x77706a, roughness: 0.97, flatShading: true }),
     roca: new THREE.MeshStandardMaterial({ color: 0x8c8378, roughness: 0.95, flatShading: true }),
     mapa: new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.65, side: THREE.DoubleSide }),
-    tambor: new THREE.MeshStandardMaterial({ map: texturaBanda, roughness: 0.8 }),
+    tambor: new THREE.MeshStandardMaterial({
+      map: texturaLienzo(256, 64, (c, a, h) => {
+        c.fillStyle = "#17181a";
+        c.fillRect(0, 0, a, h);
+        c.fillStyle = "#c9ccd1";
+        for (let i = 0; i < 6; i++) c.fillRect(i * a / 6, 0, 9, h);
+      }),
+      roughness: 0.7,
+    }),
     fallo: new THREE.MeshStandardMaterial({ map: texturaBanda, roughness: 0.7, side: THREE.DoubleSide, emissive: 0xff1010, emissiveIntensity: 0.8 }),
   };
 
@@ -323,6 +331,9 @@ const Vista3D = (() => {
   let solucion3d = null;
   let sobrecargaActual = 1;
   let derrame = null;
+  let chispas = null;
+  let humo = [];
+  let tiempoPatina = 0;
   const exageracionBase = () => {
     const n = Number(document.getElementById("cinta3d-flecha").value);
     return n === 1 && tens && tens.falloFlecha ? 20 : n;
@@ -363,6 +374,63 @@ const Vista3D = (() => {
     });
     escena.remove(objeto);
   }
+
+  const texturaHumo = texturaLienzo(64, 64, (c, a) => {
+    const g = c.createRadialGradient(a / 2, a / 2, 2, a / 2, a / 2, a / 2);
+    g.addColorStop(0, "rgba(255,255,255,0.8)");
+    g.addColorStop(1, "rgba(255,255,255,0)");
+    c.fillStyle = g;
+    c.fillRect(0, 0, a, a);
+  });
+
+  // Efecto del patinaje: la banda y el tambor rozan por arriba y por abajo.
+  function efectoPatina(dt, p) {
+    const activo = patina && verMaterialEfecto();
+    if (!chispas) return;
+    chispas.visible = activo;
+    humo.forEach(h => { h.s.visible = activo; });
+    banda.position.y = p.base + (activo ? Math.sin(tiempoPatina * 53) * 0.0045 : 0);
+    if (!activo) return;
+    const nace = (o) => {
+      o.arriba = Math.random() < 0.45;
+      o.z = (Math.random() * 2 - 1) * p.B * 0.48;
+    };
+    chispas.datos.forEach((c, i) => {
+      c.t += dt / c.dur;
+      if (c.t >= 1) {
+        c.t %= 1;
+        nace(c);
+        c.vx = c.arriba ? -0.6 - Math.random() * 1.8 : -1 - Math.random() * 2.4;
+        c.vy = c.arriba ? 0.5 + Math.random() * 1.6 : -0.3 - Math.random() * 1.2;
+        c.vz = (Math.random() - 0.5) * 1.1;
+      }
+      const t = c.t * c.dur;
+      auxiliar.position.set(
+        p.L - (c.arriba ? p.Rt * 0.25 : p.Rt * 0.15) + c.vx * t,
+        (c.arriba ? 0 : -2 * p.Rt) + c.vy * t - 4.905 * t * t,
+        c.z + c.vz * t
+      );
+      auxiliar.rotation.set(0, Math.atan2(c.vx, c.vz), 0);
+      auxiliar.scale.setScalar(1 - c.t * 0.75);
+      auxiliar.updateMatrix();
+      chispas.setMatrixAt(i, auxiliar.matrix);
+    });
+    chispas.instanceMatrix.needsUpdate = true;
+    humo.forEach(h => {
+      h.t += dt / h.dur;
+      if (h.t >= 1) {
+        h.t %= 1;
+        nace(h);
+        h.deriva = (Math.random() - 0.5) * 0.7;
+      }
+      const t = h.t * h.dur;
+      h.s.position.set(p.L - p.Rt * 0.2 - 0.25 * t, (h.arriba ? 0.02 : -2 * p.Rt) + 0.42 * t, h.z + h.deriva * t);
+      const tam = 0.14 + h.t * 0.95;
+      h.s.scale.set(tam, tam, 1);
+      h.s.material.opacity = 0.55 * Math.sin(Math.PI * h.t);
+    });
+  }
+  const verMaterialEfecto = () => !verMapa;
 
   // --- Geometría de la sección ---
   function factorArtesa(s, p) {
@@ -1019,6 +1087,20 @@ const Vista3D = (() => {
     }));
     banda.add(derrame);
 
+    // Chispas y humo del patinaje, donde la banda roza el tambor motriz.
+    const chispaG = new THREE.BoxGeometry(0.014, 0.014, 0.05);
+    chispas = new THREE.InstancedMesh(chispaG, new THREE.MeshBasicMaterial({ color: 0xffc14d }), 90);
+    chispas.frustumCulled = false;
+    chispas.visible = false;
+    chispas.datos = Array.from({ length: chispas.count }, () => ({ t: Math.random(), dur: 0.25 + Math.random() * 0.4, z: 0, vx: 0, vy: 0, vz: 0, arriba: false }));
+    banda.add(chispas);
+    humo = Array.from({ length: 22 }, () => {
+      const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: texturaHumo, transparent: true, depthWrite: false, opacity: 0, color: 0x8d8d8d }));
+      s.visible = false;
+      banda.add(s);
+      return { s, t: Math.random(), dur: 1.3 + Math.random() * 1.2, z: 0, deriva: 0, arriba: false };
+    });
+
     anclas = {
       T1: aMundo(p, L * 0.5, 0.75),
       T2: aMundo(p, L * 0.5, -2 * Rt - 0.75, B / 2),
@@ -1346,10 +1428,13 @@ const Vista3D = (() => {
   function moverPiedras(dt) {
     const p = param;
     // Si patina, la banda casi se para y el tambor gira en falso.
-    const vBanda = velocidad * (patina ? 0.2 : 1);
+    // Patinaje: el tambor gira en falso y la banda avanza a tirones (adhesión y deslizamiento).
+    tiempoPatina += dt;
+    const vBanda = patina ? velocidad * (0.03 + 0.34 * Math.max(0, Math.sin(tiempoPatina * 2.3)) ** 6) : velocidad;
+    efectoPatina(dt, p);
     recorrido += vBanda * dt;
     texturaBanda.offset.x = -recorrido / 4;
-    giratorios.forEach(g => { g.malla.rotation.y += g.omega * dt * (g.tambor ? velocidad * (patina ? 2.5 : 1) : vBanda); });
+    giratorios.forEach(g => { g.malla.rotation.y += g.omega * dt * (g.tambor ? velocidad * (patina ? 2.2 : 1) : vBanda); });
 
     rocas.datos.forEach((d, i) => {
       d.s += vBanda * dt;
@@ -1373,6 +1458,10 @@ const Vista3D = (() => {
       auxiliar.rotation.set(d.t * 9, d.t * 7, 0);
       auxiliar.scale.setScalar(d.e);
       auxiliar.updateMatrix();
+      if (patina && i / caida.count > 0.12 + vBanda / velocidad) {
+        auxiliar.scale.setScalar(0);
+        auxiliar.updateMatrix();
+      }
       caida.setMatrixAt(i, auxiliar.matrix);
     });
     caida.instanceMatrix.needsUpdate = true;
@@ -1621,6 +1710,12 @@ const Vista3D = (() => {
       { // Órbita alrededor del tambor motriz.
         camA: W(L + 3, 0.4, B / 2 + 1.2), camB: W(L - 0.4, 0.9, B / 2 + 3.6), objA: W(L - 0.1, -Rt, 0.2), objB: W(L - 0.3, -Rt, 0.2), fovA: 38, fovB: 38, dur: 8, rotulos: true, titulo: "Tambor motriz: potencia y par",
         lineas: [`F<sub>u</sub> = T₁ − T₂ = ${f(r.Fu, 2)} N`, `P<sub>u</sub> = ${f(r.Pu / 1000, 2)} kW · P<sub>eje</sub> = ${f(r.Peje / 1000, 2)} kW`, `M = ${f(r.M, 1)} N·m · n = ${f(r.n, 1)} rpm`] },
+      // Si la banda patina, la cámara se acerca al tambor desde el lado libre.
+      ...(r.relacion > r.kEuler ? [{
+        camA: W(L + 2.4, 0.5, -(B / 2 + 2.6)), camB: W(L + 0.5, -0.05, -(B / 2 + 1.25)), objA: W(L - 0.1, -Rt, -B / 4), objB: W(L, -Rt * 0.9, -B / 4), fovA: 40, fovB: 34, dur: 12,
+        titulo: "¡La banda patina!",
+        lineas: [`T₁/T₂ = ${f(r.relacion, 3)} > e^μφ = ${f(r.kEuler, 3)} <span class="no">✗</span>`, `T₂ = ${f(r.T2, 0)} N, y hacen falta ${f(r.T2adh, 0)} N`, `Se transmiten ${f(r.FuMax, 0)} N de los ${f(r.Fu, 0)} N necesarios`, "El tambor gira en falso y la banda avanza a tirones"] },
+      ] : []),
       { // Contrapicado heroico desde el suelo, con las montañas detrás.
         camA: M3(L * 0.62, 0.55, 9), camB: M3(L * 0.36, 0.7, 7.5), objA: W(L * 0.95, 1.2), objB: W(L * 0.95, 1.8), fovA: 44, fovB: 38, dur: 7, titulo: "Fuerza periférica",
         lineas: [`F<sub>u</sub> = ${f(r.Fu, 2)} N`, `T₁/T₂ = ${f(r.relacion, 3)}`] },
@@ -1967,7 +2062,7 @@ const Vista3D = (() => {
     tens.derrama = !verSolucion && (falla("Capacidad") || falla("Velocidad"));
     if (!recorrido3d) exagerar = exageracionBase();
     M.tambor.emissive.setHex(patina ? 0xb91c1c : 0x000000);
-    M.tambor.emissiveIntensity = patina ? 0.9 : 0;
+    M.tambor.emissiveIntensity = patina ? 0.4 : 0;
     const avisoFallos = document.getElementById("cinta3d-aviso");
     const mensajes = [];
     if (patina) mensajes.push(`¡La banda patina! T₁/T₂ = ${formato(r.relacion, 3)} > e^μφ = ${formato(r.kEuler, 3)}. Mira «Tambor motriz».`);
@@ -2077,5 +2172,5 @@ const Vista3D = (() => {
     nodo.classList.remove("oculto");
   }
 
-  return { bandada, discoSolar, camara, actualizar, dibujar, renderer, aviso, irARecorrido(t) { if (recorrido3d) recorrido3d.t = t; } };
+  return { paso(dt) { moverPiedras(dt); }, bandada, discoSolar, camara, actualizar, dibujar, renderer, aviso, irARecorrido(t) { if (recorrido3d) recorrido3d.t = t; } };
 })();
